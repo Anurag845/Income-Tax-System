@@ -99,11 +99,13 @@
 		<div class="topnav">
 			<a onclick="gotoHome();">Home</a>
   			<a onclick="gotoForm();">Declaration Form</a>
-  			<a onclick="gotoLimit();">Exemption Limits</a>
   			<a onclick="gotoValidate();">Declaration Validation</a>
   			<a onclick="gotoTaxable();">Taxable Amount</a>
-  			<a onclick="gotoSlabs();">Tax Slabs</a>
   			<a onclick="gotoTax();">Income Tax</a>
+  			<a onclick="gotoLimit();">Exemption Limits</a>
+  			<a onclick="gotoSlabs();">Tax Slabs</a>
+  			<a onclick="gotoSalary();">Gross Salary</a>
+  			<a onclick="gotoReset();">Reset</a>
 		</div>
 				
 	</div>
@@ -142,6 +144,8 @@
    					echo "<th>" . 'February' . "</th>";
    					echo "<th>" . 'March' . "</th>";
    					echo "<th>" . 'Annual' . "</td>";
+					echo "<th>" . 'Adjusted' . "</td>";
+					echo "<th>" . 'Education Cess' . "</td>";
    				echo"</tr>";
 				while($rows = mysqli_fetch_array($taxable)) {
 					echo"<tr>";
@@ -159,6 +163,8 @@
    					echo "<td>" . $rows['February'] . "</td>";
    					echo "<td>" . $rows['March'] . "</td>";
    					echo "<td>" . $rows['Annual'] . "</td>";
+   					echo "<td>" . $rows['Adjusted'] . "</td>";
+   					echo "<td>" . $rows['Edu_Cess'] . "</td>";
    					echo"</tr>";
 				}
 			?>
@@ -195,6 +201,14 @@
 		
 		function gotoTax() {
 			window.location.href = "tax.php";
+		}
+		
+		function gotoSalary() {
+			window.location.href = "salary.php";
+		}
+		
+		function gotoReset() {
+			window.location.href = "reset.php";
 		}
 	
 	</script>

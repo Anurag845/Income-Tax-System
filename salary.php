@@ -19,8 +19,10 @@
 		}
 		
 		td, th {
-			margin: 20px;
-			padding: 10px;
+			padding-top: 10px;
+			padding-bottom: 10px;
+			padding-left: 40px;
+			padding-right: 40px;
 			text-align: left;
 		}
 		
@@ -113,8 +115,8 @@
 
 		$conn = OpenCon();
 		
-		$limits = "select * from Limits";
-		$all_limits = mysqli_query($conn,$limits);
+		$salary = "select * from Employee";
+		$all_sal = mysqli_query($conn,$salary);
 	
 		CloseCon($conn);
 
@@ -124,46 +126,29 @@
 
 		<center>
 
-		<h2>Update Limits</h2>
+		<h2>Update Gross Salary</h2>
 
-		<form action="submit_limits.php" method="POST">
+		<form action="submit_salary.php" method="POST">
 
 		<table>
 
 			<tr>
-				<th>S.No</th>
-				<th>Entry</th>
-				<th>Limit</th>
+				<th>Id</th>
+				<th>Name</th>
+				<th>Salary</th>
 			</tr>
 	
 		<?php
-			$s_no = 1;
+			
 			$cnt = 0;
-			$input_names = array("ann_rent","medi","home_int","nat_pen","phy_hand","edu_int","prof_tax","deduc","investments");
-			while ($record = mysqli_fetch_array($all_limits)) {
+			while ($record = mysqli_fetch_array($all_sal)) {
    				echo"<tr>";
-   					echo "<td>" . $s_no . "</td>";
-   					echo "<td>" . $record['entry'] . "</td>";
-   					echo "<td> <input type='number' name='" . $input_names{$cnt} . "' min='0' value='". $record['tax_limit'] ."'> </td>";
-   				//echo "<th><a href='test.php'>Update</a> ";
+   					echo "<td>" . $record['emp_id'] . "</td>";
+   					echo "<td>" . $record['emp_name'] . "</td>";
+   					echo "<td> <input type='number' name='" . $record['emp_id'] . "' min='0' value='". $record['gross_sal'] ."'> </td>";
    				echo"</tr>";
    				$cnt++;
-   				$s_no++;
-			}
-		
-			$investments = array("CPF","PPF","NSC","ULIP","Annual Insurance","Housing Loan Principal","Children Tuition Fee","Bank Deposit","Registration Fee");
-			$s_no = 1;
-		
-			foreach ($investments as $value) {
-   				echo "<tr>";
-   				echo "<td>";
-   				echo "<td>" . $s_no . ') ' . $value . "</td>";
-   				echo "<td>";
-   			//echo "<td> <input type='number' name='" . $input_names{$cnt} . "' min='0' value='". $record['tax_limit'] ."'> </td>";
-   			//echo "<th><a href='test.php'>Update</a> ";
-   				echo"</tr>";
-   			
-   				$s_no++;
+
 			}
 		
 		?>

@@ -17,7 +17,6 @@
 		width: 50%;
 	  	padding: 10px;
 	  	background: #aaa;
-	  	border: 1px solid black;
 	}
 	
 	.left_middle {
@@ -25,8 +24,6 @@
 		width: 50%;
 	  	padding: 10px;
 	  	background: #ccc;
-	  	border-left: 1px solid black;
-	  	border-right: 1px solid black;
 	}
 	
 	.left_bottom {
@@ -34,7 +31,6 @@
 		width: 50%;
 	  	padding: 10px;
 	  	background: #aaa;
-	  	border: 1px solid black;
 	}
 
 	.left_top:hover {
@@ -66,9 +62,6 @@
 		width: 50%;
 	  	padding: 10px;
 	  	background: #bbb;
-	  	border-top: 1px solid black;
-	  	border-right: 1px solid black;
-	  	border-bottom: 1px solid black;
 	}
 	
 	.right_middle {
@@ -76,7 +69,6 @@
 		width: 50%;
 	  	padding: 10px;
 	  	background: #ddd;
-	  	border-right: 1px solid black;
 	}
 	
 	.right_bottom {
@@ -84,9 +76,6 @@
 		width: 50%;
 	  	padding: 10px;
 	  	background: #bbb;
-	  	border-top: 1px solid black;
-	  	border-right: 1px solid black;
-	  	border-bottom: 1px solid black;
 	}
 
 	.row:after {
@@ -97,9 +86,9 @@
 
 	.menu {
 		position: relative;
-    	top: 50%;
-    	transform: translateY(40%);
-		width: 40%;
+    	top: 20%;
+    	transform: translateY(20%);
+		width: 50%;
 		margin: 0 auto;
 	}
 	
@@ -109,8 +98,6 @@
         right: 0;
         height: 70px;
         width: 100%;
-		background: black;
-		color: white;
 		padding: 0;
 		position: fixed; 
 	}
@@ -161,15 +148,27 @@
 		</div>
 		
 		<div class="row">
-  			<div class="left_bottom" onclick="gotoSlabs();">
+  			<div class="left_middle" onclick="gotoSlabs();">
     			<h2>Tax Slabs</h2>
     			<p>Define tax slabs</p>
   			</div>
-  			<div class="right_bottom" onclick="gotoTax();">
+  			<div class="right_middle" onclick="gotoTax();">
     			<h2>Income Tax</h2>
     			<p>Monthly income tax</p>
   			</div>
 		</div>
+		
+		<div class="row">
+  			<div class="left_bottom" onclick="gotoSalary();">
+    			<h2>Gross Salary</h2>
+    			<p>Update Employee's Salary</p>
+  			</div>
+  			<div class="right_bottom" onclick="gotoAddEmployee();">
+    			<h2>Reset</h2>
+    			<p>Remove all records</p>
+  			</div>
+		</div>
+		
 	</div>
 
 <script>
@@ -196,6 +195,14 @@
 	
 	function gotoTax() {
 		window.location.href = "tax.php";
+	}
+	
+	function gotoSalary() {
+		window.location.href = "salary.php";
+	}
+	
+	function gotoAddEmployee() {
+		window.location.href = "reset.php";
 	}
 
 </script>

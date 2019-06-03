@@ -97,11 +97,13 @@
 		<div class="topnav">
 			<a onclick="gotoHome();">Home</a>
   			<a onclick="gotoForm();">Declaration Form</a>
-  			<a onclick="gotoLimit();">Exemption Limits</a>
   			<a onclick="gotoValidate();">Declaration Validation</a>
   			<a onclick="gotoTaxable();">Taxable Amount</a>
-  			<a onclick="gotoSlabs();">Tax Slabs</a>
   			<a onclick="gotoTax();">Income Tax</a>
+  			<a onclick="gotoLimit();">Exemption Limits</a>
+  			<a onclick="gotoSlabs();">Tax Slabs</a>
+  			<a onclick="gotoSalary();">Gross Salary</a>
+  			<a onclick="gotoReset();">Reset</a>
 		</div>
 				
 	</div>
@@ -196,6 +198,14 @@
 		
 		function gotoTax() {
 			window.location.href = "tax.php";
+		}
+		
+		function gotoSalary() {
+			window.location.href = "salary.php";
+		}
+		
+		function gotoReset() {
+			window.location.href = "reset.php";
 		}
 	
 		function validate() {

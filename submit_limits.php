@@ -79,11 +79,13 @@
 		<div class="topnav">
 			<a onclick="gotoHome();">Home</a>
   			<a onclick="gotoForm();">Declaration Form</a>
-  			<a onclick="gotoLimit();">Exemption Limits</a>
   			<a onclick="gotoValidate();">Declaration Validation</a>
   			<a onclick="gotoTaxable();">Taxable Amount</a>
-  			<a onclick="gotoSlabs();">Tax Slabs</a>
   			<a onclick="gotoTax();">Income Tax</a>
+  			<a onclick="gotoLimit();">Exemption Limits</a>
+  			<a onclick="gotoSlabs();">Tax Slabs</a>
+  			<a onclick="gotoSalary();">Gross Salary</a>
+  			<a onclick="gotoReset();">Reset</a>
 		</div>
 				
 	</div>
@@ -118,11 +120,11 @@
 			}
 			
 			$month = date('m');
-			if($month < 3) {
-				$no_of_months = 3 - $month;
+			if($month <= 3) {
+				$no_of_months = 4 - $month;
 			}
 			else {
-				$no_of_months = 12 - $month + 3;
+				$no_of_months = 12 - $month + 4;
 			}
 			
 			$get_slabs = "select * from Tax_slabs";
@@ -273,36 +275,44 @@
 					}
  				
 					$adjust = $annual_taxable - $taxable;
-					$adjust_monthly = $adjust/$no_of_months;
+					$adjust_monthly = ceil($adjust/$no_of_months);
  				
 					while($cnt < 12) {
 						$tax_months[$cnt] = $adjust_monthly;
 						$cnt += 1;
 					}
+					
+					$count = 0;
+					$adjusted_taxable = 0;
+					while($count < 12) {
+						$adjusted_taxable += $tax_months[$count];
+						$count++;
+					}
  				
-					$sql = "update Taxable_monthly set April = '$tax_months[0]', May = '$tax_months[1]', June = '$tax_months[2]', July = '$tax_months[3]', August = '$tax_months[4]', September = '$tax_months[5]', October = '$tax_months[6]', November = '$tax_months[7]', December = '$tax_months[8]', January = '$tax_months[9]', February = '$tax_months[10]', March = '$tax_months[11]' where emp_id = '$emp_id'";
+					$sql = "update Taxable_monthly set April = '$tax_months[0]', May = '$tax_months[1]', June = '$tax_months[2]', July = '$tax_months[3]', August = '$tax_months[4]', September = '$tax_months[5]', October = '$tax_months[6]', November = '$tax_months[7]', December = '$tax_months[8]', January = '$tax_months[9]', February = '$tax_months[10]', March = '$tax_months[11]', Adjusted = '$adjusted_taxable' where emp_id = '$emp_id'";
 			
 					if(mysqli_query($conn,$sql)) {
 						$taxable_flag = true;
 						//echo 'Taxable updated successfully. ';
 					}
 					else {
+						$taxable_flag = false;
 						echo mysqli_error($conn);
 					}
 			
 					$cnt = 0;
 					$new_tax = 0;
-					while($annual_taxable > $upper_bound[$cnt]) {
+					while($adjusted_taxable > $upper_bound[$cnt]) {
 						$new_tax += ($upper_bound[$cnt]-$lower_bound[$cnt])*$percent[$cnt];
 						$cnt++;
 					}
-					$new_tax += ($annual_taxable-$lower_bound[$cnt])*$percent[$cnt];
-					$new_tax = $new_tax/100;
-		
+					$new_tax += ($adjusted_taxable-$lower_bound[$cnt])*$percent[$cnt];
+					$new_tax = ceil($new_tax/100);
+
 					$get_tax = "select * from Tax_monthly where emp_id = '$emp_id'";
 					$res_tax = mysqli_query($conn,$get_tax);
 		
-					if(!$res) {
+					if(!$res_tax) {
 						echo mysqli_error($conn);
 					}
 					else {
@@ -330,22 +340,42 @@
 					}
  				
 					$adjust = $new_tax - $tax_ald;
-					$adjust_monthly = $adjust/$no_of_months;
+					$adjust_monthly = ceil($adjust/$no_of_months);
  				
 					while($cnt < 12) {
 						$tax_months[$cnt] = $adjust_monthly;
 						$cnt += 1;
 					}
+					
+					$count = 0;
+					$adjusted_tax = 0;
+					while($count < 12) {
+						$adjusted_tax += $tax_months[$count];
+						$count++;
+					}
+
+					if($adjusted_taxable <= 500000) {
+						$new_tax = 0;
+						$adjusted_tax = 0;
+						$count = 0;
+						while($count < 12) {
+							$tax_months[$count] = 0;
+							$count++;
+						}
+					}
+					
+					$edu_cess = ceil($adjusted_tax*0.04);
  				
  					//echo $new_tax;
  					
-					$sql = "update Tax_monthly set April = '$tax_months[0]', May = '$tax_months[1]', June = '$tax_months[2]', July = '$tax_months[3]', August = '$tax_months[4]', September = '$tax_months[5]', October = '$tax_months[6]', November = '$tax_months[7]', December = '$tax_months[8]', January = '$tax_months[9]', February = '$tax_months[10]', March = '$tax_months[11]', Annual = '$new_tax' where emp_id = '$emp_id'";
+					$sql = "update Tax_monthly set April = '$tax_months[0]', May = '$tax_months[1]', June = '$tax_months[2]', July = '$tax_months[3]', August = '$tax_months[4]', September = '$tax_months[5]', October = '$tax_months[6]', November = '$tax_months[7]', December = '$tax_months[8]', January = '$tax_months[9]', February = '$tax_months[10]', March = '$tax_months[11]', Annual = '$new_tax', Adjusted = '$adjusted_tax', Edu_Cess = '$edu_cess' where emp_id = '$emp_id'";
 		
 					if(mysqli_query($conn,$sql)) {
 						$tax_flag = true;
 						//echo 'Tax updated successfully.';
 					}
 					else {
+						$tax_flag = false;
 						echo mysqli_error($conn);
 					}
 				}
@@ -399,6 +429,14 @@
 
 	function gotoTax() {
 		window.location.href = "tax.php";
+	}
+	
+	function gotoSalary() {
+		window.location.href = "salary.php";
+	}
+	
+	function gotoReset() {
+		window.location.href = "reset.php";
 	}
 
 </script>
