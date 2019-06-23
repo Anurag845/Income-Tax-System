@@ -52,10 +52,6 @@
 			line-height: 70px;
 		}
 		
-		h2 {
-			margin-top: 0;
-		}
-		
 		.topnav {
 			border-top: 1px solid silver;
 			border-bottom: 1px solid black;
@@ -82,6 +78,10 @@
 			margin-top: 140px;
 		}
 		
+		#head2,#deduc {
+			margin-top: 40px;
+		}
+		
 	</style>
 
 </head>
@@ -96,14 +96,12 @@
 		
 		<div class="topnav">
 			<a onclick="gotoHome();">Home</a>
-  			<a onclick="gotoForm();">Declaration Form</a>
-  			<a onclick="gotoValidate();">Declaration Validation</a>
-  			<a onclick="gotoTaxable();">Taxable Amount</a>
-  			<a onclick="gotoTax();">Income Tax</a>
   			<a onclick="gotoLimit();">Exemption Limits</a>
   			<a onclick="gotoSlabs();">Tax Slabs</a>
   			<a onclick="gotoSalary();">Gross Salary</a>
   			<a onclick="gotoReset();">Reset</a>
+			<a onclick="gotoAddField();">Add Field</a>
+			<a onclick="gotoRemoveField();">Remove Field</a>
 		</div>
 				
 	</div>
@@ -115,8 +113,9 @@
 		
 		$limits = "select * from Limits";
 		$all_limits = mysqli_query($conn,$limits);
-	
-		CloseCon($conn);
+		
+		$deduc = "select * from Standard_Deduc";
+		$all_deducs = mysqli_query($conn,$deduc);
 
 	?>
 	
@@ -139,33 +138,66 @@
 		<?php
 			$s_no = 1;
 			$cnt = 0;
-			$input_names = array("ann_rent","medi","home_int","nat_pen","phy_hand","edu_int","prof_tax","deduc","investments");
 			while ($record = mysqli_fetch_array($all_limits)) {
-   				echo"<tr>";
+				echo"<tr>";
    					echo "<td>" . $s_no . "</td>";
    					echo "<td>" . $record['entry'] . "</td>";
-   					echo "<td> <input type='number' name='" . $input_names{$cnt} . "' min='0' value='". $record['tax_limit'] ."'> </td>";
-   				//echo "<th><a href='test.php'>Update</a> ";
+   					echo "<td> <input type='number' name='". $record['dec_id'] ."' min='0' value='". $record['tax_limit'] ."'> </td>";
    				echo"</tr>";
+				if($record['sub_field'] == "yes") {
+					$get_subs = "select sub_field from Dec_sub_fields where field_id = '$record[dec_id]'";
+					$subs = mysqli_query($conn,$get_subs);
+					if(!$subs) {
+						echo mysqli_error($conn);
+					}
+					else {
+						$c = 1;
+						while($row = mysqli_fetch_array($subs)) {
+							echo "<tr>";
+   								echo "<td></td>";
+   								echo "<td>" . $c . ') ' . $row['sub_field'] . "</td>";
+   								echo "<td>";
+   							echo"</tr>";
+   							$c++;
+						}
+					}
+				}
+   				
    				$cnt++;
    				$s_no++;
 			}
+
+			//CloseCon($conn);
+		?>
+
+		</table id="deduc">
 		
-			$investments = array("CPF","PPF","NSC","ULIP","Annual Insurance","Housing Loan Principal","Children Tuition Fee","Bank Deposit","Registration Fee");
+		<h2 id="head2">Update Deduction Values</h2>
+
+		<table>
+
+			<tr>
+				<th>S.No</th>
+				<th>Deduction</th>
+				<th>Value</th>
+			</tr>
+	
+		<?php
 			$s_no = 1;
-		
-			foreach ($investments as $value) {
-   				echo "<tr>";
-   				echo "<td>";
-   				echo "<td>" . $s_no . ') ' . $value . "</td>";
-   				echo "<td>";
-   			//echo "<td> <input type='number' name='" . $input_names{$cnt} . "' min='0' value='". $record['tax_limit'] ."'> </td>";
-   			//echo "<th><a href='test.php'>Update</a> ";
+			$cnt = 0;
+			while ($record = mysqli_fetch_array($all_deducs)) {
+				echo"<tr>";
+   					echo "<td>" . $s_no . "</td>";
+   					echo "<td>" . $record['field'] . "</td>";
+   					$name = str_replace(' ', '', $record['field']);
+   					echo "<td> <input type='number' name='$name' min='0' value='". $record['value'] ."'> </td>";
    				echo"</tr>";
-   			
+				   				
+   				$cnt++;
    				$s_no++;
 			}
-		
+
+			//CloseCon($conn);
 		?>
 
 		</table>
@@ -173,25 +205,17 @@
 		<input type="submit" value="Submit" style="margin-top:20px;margin-bottom:40px;">
 	
 		</form>
-
+		
 	</center>
 	
 	<script>
 	
 		function gotoHome() {
-			window.location.href = "menu.html";
-		}
-		
-		function gotoForm() {
-			window.location.href = "form.php";
+			window.location.href = "admin_menu.html";
 		}
 	
 		function gotoLimit() {
 			window.location.href = "limits.php";
-		}
-	
-		function gotoValidate() {
-			window.location.href = "validate.php";
 		}
 
 		function gotoTaxable() {
@@ -202,16 +226,20 @@
 			window.location.href = "tax_slabs.php";
 		}
 
-		function gotoTax() {
-			window.location.href = "tax.php";
-		}
-		
 		function gotoSalary() {
 			window.location.href = "salary.php";
 		}
 		
 		function gotoReset() {
 			window.location.href = "reset.php";
+		}
+
+		function gotoAddField() {
+			window.location.href = "new_fields.php";
+		}
+
+		function gotoRemoveField() {
+			window.location.href = "remove_fields.php";
 		}
 	
 	</script>

@@ -78,14 +78,12 @@
 		
 		<div class="topnav">
 			<a onclick="gotoHome();">Home</a>
-  			<a onclick="gotoForm();">Declaration Form</a>
-  			<a onclick="gotoValidate();">Declaration Validation</a>
-  			<a onclick="gotoTaxable();">Taxable Amount</a>
-  			<a onclick="gotoTax();">Income Tax</a>
   			<a onclick="gotoLimit();">Exemption Limits</a>
   			<a onclick="gotoSlabs();">Tax Slabs</a>
   			<a onclick="gotoSalary();">Gross Salary</a>
   			<a onclick="gotoReset();">Reset</a>
+  			<a onclcik="gotoAddField();">Add Field</a>
+  			<a onclick="gotoRemoveField();">Remove Field</a>
 		</div>
 				
 	</div>
@@ -93,62 +91,36 @@
 	<div class="contents">
 
 		<?php
-		
+
+			include 'db_connect.php';
+	
+			$conn = OpenCon();
+			
+			$dec_sql = "select tax_limit,dec_id,sub_field from Limits";
+			$decs = mysqli_query($conn,$dec_sql);
+				
+			if(!$decs) {
+				echo mysqli_error($conn);
+			}
+			else {
+				$dec_ids = array();
+				$sub_present = array();
+				$limits = array();
+				$cnt = 0;
+				while($row = mysqli_fetch_array($decs)) {
+					$dec_ids[$cnt] = $row['dec_id'];
+					$sub_present[$cnt] = $row['sub_field'];
+					$limits[$cnt] = $row['tax_limit'];
+					$cnt++;
+				}
+			}
+				
 			$month = date('m');
 			if($month <= 3) {
 				$no_of_months = 4 - $month;
 			}
 			else {
 				$no_of_months = 12 - $month + 4;
-			}
-
-			include 'db_connect.php';
-
-			$conn = OpenCon();
-	
-			$sql = "select * from Employee";
-			$get_names = mysqli_query($conn,$sql);
-			$names = array();
-			$emp_ids = array();
-			$salaries = array();
-			$cnt = 0;
-			if(!$get_names) {
-				echo mysqli_error($conn);
-			}
-			else {
-				while($result = mysqli_fetch_array($get_names)) {
-					$names[$cnt] = $result['emp_name'];
-					$emp_ids[$cnt] = $result['emp_id'];
-					$salaries[$cnt] = $result['gross_sal'];
-					$cnt++;
-				}
-			}
-			
-			$get_limits = "select tax_limit from Limits";
-			$result = mysqli_query($conn,$get_limits);
-			
-			$categories = array('ann_rent','medi','home_int','nat_pen','phy_hand','edu_int','prof_tax','deduc','investments');
-			$limits = array();
-			
-			if(!$result) {
-				echo mysqli_error($conn);
-			}
-			else {
-				$count = 0;
-				while($row = mysqli_fetch_array($result)) {
-					$limits[$count] = $row['tax_limit'];
-					$count++;
-				}
-				
-				$ann_rent = $limits[0];
-				$medi = $limits[1];
-				$home_int = $limits[2];
-				$nat_pen = $limits[3];
-				$phy_hand = $limits[4];
-				$edu_int = $limits[5];
-				$prof_tax = $limits[6];
-				$deduc = $limits[7];
-				$investments = $limits[8];
 			}
 			
 			$get_slabs = "select * from Tax_slabs";
@@ -157,124 +129,135 @@
 			$lower_bound = array();
 			$upper_bound = array();
 			$percent = array();
-			$cnt = 0;
-		
+			$count = 0;
+			
 			if(!$slabs) {
 				echo mysqli_error($conn);
 			}
 			else {
 				while($result = mysqli_fetch_array($slabs)) {
-					$lower_bound[$cnt] = $result['lower_boundary'];
-					$upper_bound[$cnt] = $result['upper_boundary'];
-					$percent[$cnt] = $result['percent'];
-					$cnt += 1;
+					$lower_bound[$count] = $result['lower_boundary'];
+					$upper_bound[$count] = $result['upper_boundary'];
+					$percent[$count] = $result['percent'];
+					$count += 1;
 				}
 			}
 			
-			for($sal_counter = 0; $sal_counter < $cnt; $sal_counter++) {
+			
+			$no_of_emp = "select * from Taxable_monthly";
+			$res = mysqli_query($conn,$no_of_emp);
+			
+			if(!$res) {
+				echo mysqli_error($conn);
+			}
+			else {
+				$emp_cnt = mysqli_num_rows($res);
+				while($result = mysqli_fetch_array($res)) {
+					$emp_id = $result['emp_id'];
 				
-				$emp_id = $emp_ids[$sal_counter];
-				if(!empty($_POST[$emp_id]) && $_POST[$emp_id] != "") {
-					$new_sal = $_POST[$emp_id];
-					$old_sal = $salaries[$sal_counter];
+					if(isset($_POST[$emp_id]) && $_POST[$emp_id] != "") {
+						
+						$new_sal = $_POST[$emp_id];
 					
-					if($new_sal != $old_sal) {
-						
-						$update = "update Employee set gross_sal = $new_sal where emp_id = '$emp_id'";
-						if(mysqli_query($conn,$update)) {
-							echo "Salary updated successfully. ";
-						}
-						else {
-							echo mysqli_error($conn);
-						}
-						
-						$annual_taxable = $new_sal;
-						$get_dec = "select * from Declarations where emp_id = '$emp_id'";
-						$dec = mysqli_query($conn,$get_dec);
-						if(!$dec) {
-							echo mysqli_error($conn);
-						}
-						else {
-							$invests = 0;
-							while($result = mysqli_fetch_array($dec)) {
-								$dec_id = $result['dec_id'];
-								$desc = $result['dec_type'];
-								$status = $result['status'];
-								
-								if($status == 'Pending') {
-									$val = $result['amount_declared'];
-								}
-								else {
-									$val = $result['amount_proved'];
-								}
-								
-								if($dec_id == 'ann_rent') {
-									if($val < $ann_rent) {
-										$annual_taxable -= $val;
-									}
-									else {
-										$annual_taxable -= $ann_rent;
-									}
-								}
-								else if($dec_id == 'medi') {
-									if($val < $medi) {
-										$annual_taxable -= $val;
-									}
-									else {
-										$annual_taxable -= $medi;
-									}
-								}
-								else if($dec_id == 'home_int') {
-									if($val < $home_int) {
-										$annual_taxable -= $val;
-									}
-									else {
-										$annual_taxable -= $home_int;
-									}
-								}
-								else if($dec_id == 'nat_pen') {
-									if($val < $nat_pen) {
-										$annual_taxable -= $val;
-									}
-									else {
-										$annual_taxable -= $nat_pen;
-									}
-								}
-								else if($dec_id == 'phy_hand') {
-									if($val < $phy_hand) {
-										$annual_taxable -= $val;
-									}
-									else {
-										$annual_taxable -= $phy_hand;
-									}
-								}
-								else if($dec_id == 'edu_int') {
-									if($val < $edu_int) {
-										$annual_taxable -= $val;
-									}
-									else {
-										$annual_taxable -= $edu_int;
-									}
-								}
-								else if($dec_id=='cpf' || $dec_id=='ppf' || $dec_id=='nsc' || $dec_id=='ulip' || $dec_id=='ann_ins' || $dec_id=='hsg_loan_prin' || $dec_id=='tuition_fee' || $dec_id=='bank_deposit' || $dec_id=='reg_fee') {
-									$invests += $val;
-								}
-								
-							}
+						$get_gross = "select gross_sal from Employee where emp_id = '$emp_id'";
+						$gross = mysqli_query($conn,$get_gross);
+						$temp = $gross->fetch_assoc();
+						$old_sal = $temp['gross_sal'];
 							
-							if($invests < $investments) {
-								$annual_taxable -= $invests;
+						if($old_sal != $new_sal) {
+						
+							$update_sal = "update Employee set gross_sal = $new_sal where emp_id = '$emp_id'";
+							mysqli_query($conn,$update_sal);
+							
+							$annual_taxable = $new_sal;
+						
+							$get_dec = "select * from Declarations where emp_id='$emp_id'";
+							$decs = mysqli_query($conn,$get_dec);
+						
+							if(!$decs) {
+								echo mysqli_error($conn);
 							}
 							else {
-								$annual_taxable -= $investments;
+								$declared_id = array();
+								$amount = array();
+								$status = array();
+								$dec_cnt = 0;
+								while($row = mysqli_fetch_array($decs)) {
+									$declared_id[$dec_cnt] = $row['dec_id'];
+									$status[$dec_cnt] = $row['status'];
+									if($status[$dec_cnt] == "Proved") {
+										$amount[$dec_cnt] = $row['amount_proved'];
+									}
+									else {
+										$amount[$dec_cnt] = $row['amount_declared'];
+									}
+									$dec_cnt++;
+								}
 							}
-					
-							$annual_taxable -= $prof_tax;
-							$annual_taxable -= $deduc;
-					
+						
+							$c = 0;
+							while($c < $cnt) {
+								if($sub_present[$c] == "yes") {
+									$get_subs = "select sub_id from Dec_sub_fields where field_id = '$dec_ids[$c]'";
+									$res = mysqli_query($conn,$get_subs);
+									if(!$res) {
+										echo mysqli_error($conn);
+									}
+									else {
+										$sub_id = array();
+										$sub_cnt = 0;
+										while($row = mysqli_fetch_array($res)) {
+											$sub_id[$sub_cnt] = $row['sub_id'];
+											$sub_cnt++;
+										}
+									}
+									$value = 0;
+									for($i = 0; $i < $sub_cnt; $i++) {
+										for($j = 0; $j < $dec_cnt; $j++) {
+											if($sub_id[$i] == $declared_id[$j]) {
+												$value += $amount[$j];
+											}
+										}
+									}
+									if($value < $limits[$c]) {
+										$annual_taxable -= $value;
+									}
+									else {
+										$annual_taxable -= $limits[$c];
+									}
+								}
+								else {
+									for($k = 0; $k < $dec_cnt; $k++) {
+										if($declared_id[$k] == $dec_ids[$c]) {
+											$value = $amount[$k];
+											$limit = $limits[$c];
+											if($value < $limit) {
+												$annual_taxable -= $value;
+											}
+											else {
+												$annual_taxable -= $limit;
+											}
+											break;
+										}
+									}
+								}
+								$c++;
+							}
+				
+							$get_std = "select value from Standard_Deduc";
+							$std = mysqli_query($conn,$get_std);
+							if(!$std) {
+								echo mysqli_error($conn);
+							}
+							else {
+								while($row = mysqli_fetch_array($std)) {
+									$annual_taxable -= $row['value'];
+								}
+							}
+			
 							$update_annual = "update Taxable_monthly set Annual = '$annual_taxable' where emp_id = '$emp_id'";
 							mysqli_query($conn,$update_annual);
-							
+ 				
 							$april = $result['April'];
  							$may = $result['May'];
  							$june = $result['June'];
@@ -288,23 +271,22 @@
 							$february = $result['February'];
 							$march = $result['March'];
 							$tax_months = array($april,$may,$june,$july,$august,$september,$october,$november,$december,$january,$february,$march);
-					//}
  				
-							$cnt = 0;
+							$count = 0;
 							$taxable = 0;
-							while($cnt < 12-$no_of_months) {
-								$taxable += $tax_months[$cnt];
-								$cnt += 1;
+							while($count < 12-$no_of_months) {
+								$taxable += $tax_months[$count];
+								$count += 1;
 							}
  				
 							$adjust = $annual_taxable - $taxable;
 							$adjust_monthly = ceil($adjust/$no_of_months);
  				
-							while($cnt < 12) {
-								$tax_months[$cnt] = $adjust_monthly;
-								$cnt += 1;
+							while($count < 12) {
+								$tax_months[$count] = $adjust_monthly;
+								$count += 1;
 							}
-							
+						
 							$count = 0;
 							$adjusted_taxable = 0;
 							while($count < 12) {
@@ -316,26 +298,24 @@
 			
 							if(mysqli_query($conn,$sql)) {
 								$taxable_flag = true;
-						//echo 'Taxable updated successfully. ';
 							}
 							else {
-								$taxable_monthly = false;
+								$taxable_flag = false;
 								echo mysqli_error($conn);
 							}
 			
-							$cnt = 0;
+							$count = 0;
 							$new_tax = 0;
-							while($adjusted_taxable > $upper_bound[$cnt]) {
-								$new_tax += ($upper_bound[$cnt]-$lower_bound[$cnt])*$percent[$cnt];
-								$cnt++;
+							while($adjusted_taxable > $upper_bound[$count]) {
+								$new_tax += ($upper_bound[$count]-$lower_bound[$count])*$percent[$count];
+								$count++;
 							}
-							$new_tax += ($adjusted_taxable-$lower_bound[$cnt])*$percent[$cnt];
+							$new_tax += ($adjusted_taxable-$lower_bound[$count])*$percent[$count];
 							$new_tax = ceil($new_tax/100);
-							
-		
+
 							$get_tax = "select * from Tax_monthly where emp_id = '$emp_id'";
 							$res_tax = mysqli_query($conn,$get_tax);
-		
+			
 							if(!$res_tax) {
 								echo mysqli_error($conn);
 							}
@@ -355,30 +335,29 @@
 								$march = $result['March'];
 								$tax_months = array($april,$may,$june,$july,$august,$september,$october,$november,$december,$january,$february,$march);
 							}
- 				
-							$cnt = 0;
+ 					
+							$count = 0;
 							$tax_ald = 0;
-							while($cnt < 12-$no_of_months) {
-								$tax_ald += $tax_months[$cnt];
-								$cnt += 1;
+							while($count < 12-$no_of_months) {
+								$tax_ald += $tax_months[$count];
+								$count += 1;
 							}
  				
 							$adjust = $new_tax - $tax_ald;
 							$adjust_monthly = ceil($adjust/$no_of_months);
  				
-							while($cnt < 12) {
-								$tax_months[$cnt] = $adjust_monthly;
-								$cnt += 1;
+							while($count < 12) {
+								$tax_months[$count] = $adjust_monthly;
+								$count += 1;
 							}
- 				
- 				
- 							$count = 0;
+						
+							$count = 0;
 							$adjusted_tax = 0;
 							while($count < 12) {
 								$adjusted_tax += $tax_months[$count];
 								$count++;
 							}
-							
+
 							if($adjusted_taxable <= 500000) {
 								$new_tax = 0;
 								$adjusted_tax = 0;
@@ -392,25 +371,20 @@
 							$edu_cess = ceil($adjusted_tax*0.04);
  					
 							$sql = "update Tax_monthly set April = '$tax_months[0]', May = '$tax_months[1]', June = '$tax_months[2]', July = '$tax_months[3]', August = '$tax_months[4]', September = '$tax_months[5]', October = '$tax_months[6]', November = '$tax_months[7]', December = '$tax_months[8]', January = '$tax_months[9]', February = '$tax_months[10]', March = '$tax_months[11]', Annual = '$new_tax', Adjusted = '$adjusted_tax', Edu_Cess = '$edu_cess' where emp_id = '$emp_id'";
-		
+			
 							if(mysqli_query($conn,$sql)) {
 								$tax_flag = true;
-						//echo 'Tax updated successfully.';
 							}
 							else {
+								$tax_flag = false;
 								echo mysqli_error($conn);
 							}
 						}
 						if($taxable_flag == true and $tax_flag == true) {
 							echo 'Taxable updated successfully. Tax updated successfully.';
-						}	
+						}
 					}
-					
 				}
-				else {
-					//echo 'Salary field empty';
-				}
-				
 			}
 			
 			CloseCon($conn);
@@ -429,43 +403,35 @@
 <script>
 
 	function goBack() {
-		window.location.href = "salary.php";
+		window.location.href = "limits.php";
 	}
 
 	function gotoHome() {
-		window.location.href = "menu.html";
-	}
-        
-    function gotoForm() {
-		window.location.href = "form.php";
+		window.location.href = "admin_menu.html";
 	}
 	
 	function gotoLimit() {
 		window.location.href = "limits.php";
 	}
-	
-	function gotoValidate() {
-		window.location.href = "validate.php";
-	}
 
-	function gotoTaxable() {
-		window.location.href = "taxable.php";
-	}
-	
 	function gotoSlabs() {
 		window.location.href = "tax_slabs.php";
 	}
 
-	function gotoTax() {
-		window.location.href = "tax.php";
-	}
-	
 	function gotoSalary() {
 		window.location.href = "salary.php";
 	}
 	
 	function gotoReset() {
 		window.location.href = "reset.php";
+	}
+	
+	function gotoAddField() {
+		window.location.href = "new_fields.php";
+	}
+	
+	function gotoRemoveField() {
+		window.location.href = "remove_fields.php";
 	}
 
 </script>

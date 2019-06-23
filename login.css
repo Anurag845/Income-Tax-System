@@ -1,0 +1,75 @@
+		.login-form {
+			position: absolute;
+			top: 30%;
+			right: 30%;
+		}
+
+		.text-logo {
+			position: absolute;
+			top: 30%;
+			left: 30%;
+		}
+
+		Html,body {
+			height: 100%;
+			margin: 0px;
+			padding: 0px;
+		}
+
+		#title {
+			text-align: center;
+			font-family: Arial, Helvetica, sans-serif;
+		}
+
+		.usr_div {
+			display: flex;
+			flex-direction: row;
+			border: 1px solid grey;
+		}
+		
+		#eye, #question {
+			margin: 0;
+			padding: 0;
+			border: none;
+			background: white;
+		}
+
+		.pass_div {
+			display: flex;
+			flex-direction: row;
+			border: 1px solid grey;
+		}
+
+		#log_password {
+			flex-grow: 1;
+			border: none;
+		}
+
+		#log_username {
+			flex-grow: 1;
+			border: none;
+		}
+
+		input: focus {
+			outline: none;
+		}
+
+		button > img, button > span {
+  			vertical-align: middle;
+		}
+
+		.img_pass, .img_usr {
+			width: 25px;
+			height: 25px;
+		}
+
+		#login_btn, #frg_pwd {
+			margin: 0;
+			padding: 0;
+			border: 1px solid grey;
+			background: white;
+		}
+
+		input, button, select, option, textarea {
+    		font-size: 100%;
+		}

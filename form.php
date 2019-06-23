@@ -29,7 +29,10 @@
 
         td, th {
             text-align: left;
-            padding: 10px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            padding-left: 20px;
+            padding-right: 20px;
         }
         
         #dec_form {
@@ -122,10 +125,6 @@
   			<a onclick="gotoValidate();">Declaration Validation</a>
   			<a onclick="gotoTaxable();">Taxable Amount</a>
   			<a onclick="gotoTax();">Income Tax</a>
-  			<a onclick="gotoLimit();">Exemption Limits</a>
-  			<a onclick="gotoSlabs();">Tax Slabs</a>
-  			<a onclick="gotoSalary();">Gross Salary</a>
-  			<a onclick="gotoReset();">Reset</a>
 		</div>
 				
 	</div>
@@ -282,12 +281,27 @@
             						echo "<th>" . 'Amount' . "</th>";
             					echo "</tr>";
             				
-            					$sr_num = array('01','02','03','04','05','06');
-            					$descriptions = array('Annual Rent (Only of residential unit not owned by employer)','Mediclaim (U/s. 80D of I.T. Act)','Interest paid for Home Loan','National Pension','Physically Handicap Above 70%','Education Loan Int.');
-            					$cat_id = array('ann_rent','medi','home_int','nat_pen','phy_hand','edu_int');
+            					$get_fields = "select entry,sub_field,dec_id from Limits";
+            					$fields = mysqli_query($conn,$get_fields);
+            					if(!$fields) {
+            						echo mysqli_error($conn);
+            					}
+            					else {
+            						$sr_num = array();
+            						$descriptions = array();
+            						$cat_id = array();
+            						$sub_present = array();
+            						$cnt_var = 0;
+            						while($row = mysqli_fetch_array($fields)) {
+            							$descriptions[$cnt_var] = $row['entry'];
+            							$sr_num[$cnt_var] = $cnt_var+1;
+            							$cat_id[$cnt_var] = $row['dec_id'];
+            							$sub_present[$cnt_var] = $row['sub_field'];
+            							$cnt_var++;
+            						}
+            					}
             				
-            				
-            					for($dec_counter = 0; $dec_counter < 6; $dec_counter++) {
+            					for($dec_counter = 0; $dec_counter < $cnt_var; $dec_counter++) {
             					
             						$count = 0;
 									foreach($dec_id as $type) {
@@ -311,99 +325,104 @@
 										$value_type = 'declared';
 									}
 							
-            						echo "<tr>";
-                						echo "<td>" . $sr_num[$dec_counter] . "</td>";
-                    					echo "<td>" . $descriptions[$dec_counter] . "</td>";
-                    					if($value_type == 'proved') {
-                    						echo "<td>" . $value . "<td>";
-                    						echo "<td><input type='hidden' name='$cat_id[$dec_counter]'></td>";
-                    					}
-                    					else {
-                    						echo "<td><input type='number' name='$cat_id[$dec_counter]' min='0' value='$value'></td>";
-                    					}
-                					echo "</tr>";
+									if($sub_present[$dec_counter] == "no") {
+            							echo "<tr>";
+                							echo "<td>" . $sr_num[$dec_counter] . "</td>";
+                    						echo "<td>" . $descriptions[$dec_counter] . "</td>";
+                    						if($value_type == 'proved') {
+                    							echo "<td>" . $value . "<td>";
+                    							echo "<td><input type='hidden' name='$cat_id[$dec_counter]'></td>";
+                    						}
+                    						else {
+                    							echo "<td><input type='number' name='$cat_id[$dec_counter]' min='0' value='$value'></td>";
+                    						}
+                						echo "</tr>";
+                					}
+                					else {
+                						echo "<tr>";
+                        					echo "<td>" . $sr_num[$dec_counter] . "</td>";
+                        					echo "<td>" . $descriptions[$dec_counter] . "</td>";
+                        					echo "<td><input type='hidden' name='$cat_id[$dec_counter]' value=0></td>";
+                        					echo "<td></td>";
+                    					echo "</tr>";
+                    					
+                    					$get_sub_fields = "select * from Dec_sub_fields";
+            							$sub_fields = mysqli_query($conn,$get_sub_fields);
+            							if(!$sub_fields) {
+            								echo mysqli_error($conn);
+            							}
+            							else {
+            								$subs = array();
+            								$sub_ids = array();
+            								$c = 0;
+            								while($row = mysqli_fetch_array($sub_fields)) {
+            									$subs[$c] = $row['sub_field'];
+            									$sub_ids[$c] = $row['sub_id'];
+            									$c++;
+            								}
+            							}
+                    		
+                    		
+               							for($sub_counter = 0; $sub_counter < $c; $sub_counter++) {
+               				
+               								$count = 0;
+											foreach($dec_id as $type) {
+												if($type == $sub_ids[$sub_counter]) {
+													break;
+												}
+												$count++;
+											}
+											if($count < $cnt) {
+												if($amt_prov[$count] != 0) {
+													$value = $amt_prov[$count];
+													$value_type = 'proved';
+												}
+												else {
+													$value = $amt_dec[$count];
+													$value_type = 'declared';
+												}
+											}
+											else {
+												$value = null;
+												$value_type = 'declared';
+											}
+		
+                    						echo "<tr>";
+                        						echo "<td></td>";
+                        						echo "<td>" . $subs[$sub_counter] . "</td>";
+                        						if($value_type == 'proved') {
+                    								echo "<td>" . $value . "<td>";
+                    								echo "<td><input type='hidden' name='$sub_ids[$sub_counter]'></td>";
+                    							}
+                    							else {
+                    								echo "<td><input type='number' name='$sub_ids[$sub_counter]' min='0' value='$value'></td>";
+                    							}
+                    						echo "</tr>";
+               				
+               							}
+                					}
             				
             					}
-                    		
-                    			$invest_descriptions = array('a. CPF','b. PPF','c. NSC','d. ULIP/Mutual Fund','e. Annual Insurance Premium','f. Housing Loan Principal Amount','g. Tuition fee of children','h. Bank Deposit','i. Registration Fee');
-                    			$invest_id =  array('cpf','ppf','nsc','ulip','ann_ins','hsg_loan_prin','tuition_fee','bank_deposit','reg_fee');
-
-                    			echo "<tr>";
-                        			echo "<td>" . '07' . "</td>";
-                        			echo "<td>" . 'Investments U/S. 80C of I.T. Act' . "</td>";
-                        			echo "<td></td>";
-                    			echo "</tr>";
-                    		
-               					for($invest_counter = 0; $invest_counter < 9; $invest_counter++) {
-               				
-               						$count = 0;
-									foreach($dec_id as $type) {
-										if($type == $invest_id[$invest_counter]) {
-											break;
-										}
-										$count++;
-									}
-									if($count < $cnt) {
-										if($amt_prov[$count] != 0) {
-											$value = $amt_prov[$count];
-											$value_type = 'proved';
-										}
-										else {
-											$value = $amt_dec[$count];
-											$value_type = 'declared';
-										}
-									}
-									else {
-										$value = null;
-										$value_type = 'declared';
-									}
-
-                    				echo "<tr>";
-                        				echo "<td></td>";
-                        				echo "<td>" . $invest_descriptions[$invest_counter] . "</td>";
-                        				if($value_type == 'proved') {
-                    						echo "<td>" . $value . "<td>";
-                    						echo "<td><input type='hidden' name='$invest_id[$invest_counter]'></td>";
-                    					}
-                    					else {
-                    						echo "<td><input type='number' name='$invest_id[$invest_counter]' min='0' value='$value'></td>";
-                    					}
-                    				echo "</tr>";
-               				
-               					}
-                    		
-                    		                   		
-                    			$get_ptax = "select tax_limit from Limits where entry = 'Profession Tax'";
-								$res = mysqli_query($conn,$get_ptax);
-								if(!$res) {
-									echo mysqli_error($conn);
-								}
-								else {
-									$temp = $res->fetch_assoc();
-									$prof_tax = $temp['tax_limit'];
-								}
-							
-								echo "<tr>";
-                        			echo "<td>08</td>";
-                        			echo "<td>" . 'Profession Tax' . "</td>";	
-                        			echo "<td>" . $prof_tax . "</td>";
-                    			echo "</tr>";
-                    		
-                    			$get_deduc = "select tax_limit from Limits where entry = 'Deduction'";
-								$res = mysqli_query($conn,$get_deduc);
-								if(!$res) {
-									echo mysqli_error($conn);
-								}
-								else {
-									$temp = $res->fetch_assoc();
-									$deduction = $temp['tax_limit'];
-								}
-							
-								echo "<tr>";
-                        			echo "<td>09</td>";
-                        			echo "<td>" . 'Standard Deduction' . "</td>";	
-                        			echo "<td>" . $deduction . "</td>";
-                    			echo "</tr>";
+            					
+            					$get_fixed = "select * from Standard_Deduc";
+                    			$fixed = mysqli_query($conn,$get_fixed);
+                    			
+                    			if(!$fixed) {
+                    				echo mysqli_error($conn);
+                    			}
+                    			else {
+                    				$cnt_var++;
+                    				while($row = mysqli_fetch_array($fixed)) {
+                    					$fixed_name = $row['field'];
+                    					$fixed_value = $row['value'];
+                    					echo "<tr>";
+                        					echo "<td>" . $cnt_var . "</td>";
+                        					echo "<td>" . $fixed_name . "</td>";	
+                        					echo "<td>" . $fixed_value . "</td>";
+                    					echo "</tr>";
+                    					$cnt_var++;
+                    				}
+                    			}
                     		
                     			echo "<tr>";
                     				echo "<td colspan='3' style='text-align:center'><input type='submit' value='Submit'></td>";
@@ -442,15 +461,11 @@
 		}
 		
         function gotoHome() {
-			window.location.href = "menu.html";
+			window.location.href = "user_menu.html";
 		}
         
         function gotoForm() {
 			window.location.href = "form.php";
-		}
-	
-		function gotoLimit() {
-			window.location.href = "limits.php";
 		}
 	
 		function gotoValidate() {
@@ -461,20 +476,8 @@
 			window.location.href = "taxable.php";
 		}
 		
-		function gotoSlabs() {
-			window.location.href = "tax_slabs.php";
-		}
-
 		function gotoTax() {
 			window.location.href = "tax.php";
-		}
-		
-		function gotoSalary() {
-			window.location.href = "salary.php";
-		}
-		
-		function gotoReset() {
-			window.location.href = "reset.php";
 		}
         
     </script>

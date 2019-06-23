@@ -64,6 +64,18 @@
 		background: white;
 		border: 1px solid grey;
 	}
+	
+	td {
+		padding: 10px 20px;
+	}
+
+	fieldset {
+		width: 50%;
+	}
+	
+	.back_btn {
+		margin-bottom: 50px;
+	}
 
 </style>
 
@@ -82,8 +94,8 @@
   			<a onclick="gotoSlabs();">Tax Slabs</a>
   			<a onclick="gotoSalary();">Gross Salary</a>
   			<a onclick="gotoReset();">Reset</a>
-			<a onclick="gotoAddField();">Add Field</a>
-			<a onclick="gotoRemoveField();">Remove Field</a>
+  			<a onclick="gotoAddField();">Add Field</a>
+  			<a onclick="gotoRemoveField();">Remove Field</a>
 		</div>
 				
 	</div>
@@ -91,12 +103,71 @@
 	<div class="contents">
 
 		<?php
-
 			include 'db_connect.php';
-
+			
 			$conn = OpenCon();
 			
-			$dec_sql = "select dec_id,sub_field from Limits";
+			if($_POST["submit"] == "Submit Field") {
+			
+				$field_name = $_POST['dec_name'];
+				$field_desc = $_POST['dec_desc'];
+				$field_limit = $_POST['dec_limit'];
+			
+				$dec_id = strtolower(substr($field_name,0,4));
+				$dec_id = str_replace(' ', '', $dec_id);
+			
+				if(!isset($_POST['sub_field'])) {
+					$sql = "insert into Limits values('$field_name','$field_limit','no','$dec_id')";
+					if(mysqli_query($conn,$sql)) {
+						echo "Field added successfully. ";
+					}
+					else {
+						echo mysqli_error($conn);
+					}
+				}
+				else {
+					$flag = true;
+					$sql = "insert into Limits values('$field_name','$field_limit','yes','$dec_id')";
+					if(mysqli_query($conn,$sql)) {
+						$flag = true;
+					}
+					else {
+						$flag = false;
+					}
+					$sub_fields = $_POST['sub_field'];
+					foreach($sub_fields as $sub_field) {
+						$sub_id = strtolower(substr($sub_field,0,4));
+						$sub_id = str_replace(' ', '', $sub_id);
+						$sub_id = "sub_" . $sub_id;
+						$sql = "insert into Dec_sub_fields values('$dec_id','$sub_field','$sub_id')";
+						if(mysqli_query($conn,$sql)) {
+							$flag = true;
+						}
+						else {
+							$flag = false;
+						}
+					}
+					if($flag == true) {
+						echo "Field added successfully. ";
+					}
+					else {
+						echo mysqli_error($conn);
+					}
+				}
+			}
+			else if($_POST["submit"] == "Submit Deduction") {
+				$ded_name = $_POST["ded_name"];
+				$ded_desc = $_POST["ded_desc"];
+				$ded_value = $_POST["ded_value"];
+				
+				$ded_id = strtolower(substr($ded_name,0,4));
+				$ded_id = str_replace(' ', '', $ded_id);
+				
+				$sql = "insert into Standard_Deduc values('$ded_name',$ded_value,'$ded_id')";
+				mysqli_query($conn,$sql);
+			}
+			
+			$dec_sql = "select dec_id,sub_field,tax_limit from Limits";
 			$decs = mysqli_query($conn,$dec_sql);
 			
 			if(!$decs) {
@@ -105,60 +176,13 @@
 			else {
 				$dec_ids = array();
 				$sub_present = array();
+				$limits = array();
 				$cnt = 0;
 				while($row = mysqli_fetch_array($decs)) {
 					$dec_ids[$cnt] = $row['dec_id'];
 					$sub_present[$cnt] = $row['sub_field'];
+					$limits[$cnt] = $row['tax_limit'];
 					$cnt++;
-				}
-			}
-			
-			$limits = array();
-			$cnt = 0;
-			$flag = false;
-			foreach($dec_ids as $dec_id) {
-				$limits[$cnt] = $_POST[$dec_id];
-				$sql = "update Limits set tax_limit = $limits[$cnt] where dec_id = '$dec_id'";
-				if(mysqli_query($conn,$sql)) {
-					$flag = true;
-				}
-				else {
-					$flag = false;
-				}
-				$cnt++;
-			}
-	
-			if($flag == true) {
-    			echo "Limits updated successfully. ";
-			} 
-			else {
-    			echo mysqli_error($conn);
-			}
-			
-			$deduc = array();
-			$sql = "select field from Standard_Deduc";
-			$res = mysqli_query($conn,$sql);
-			if(!$res) {
-				echo mysqli_error($conn);
-			}
-			else {
-				$d_c = 0;
-				$flag = false;
-				while($row = mysqli_fetch_array($res)) {
-					$deduc[$d_c] = $row["field"];
-					$name = str_replace(' ', '', $deduc[$d_c]);
-					$val = $_POST[$name];
-					$sql = "update Standard_Deduc set value=$val where field = '$deduc[$d_c]'";
-					if(mysqli_query($conn,$sql)) {
-						$flag = true;
-					}
-					else {
-						$flag = false;
-					}
-					$d_c++;
-				}
-				if($flag == false) {
-					echo mysqli_error($conn);
 				}
 			}
 			
@@ -423,21 +447,14 @@
 				}
 			}
 			
-			CloseCon($conn);
-
 		?>
-
-		<br>
-		<br>
-	
-		<button onclick="goBack();">Back</button>
 	
 	</div>
 
 </body>
 
-<script>
-
+<script>	
+	
 	function goBack() {
 		window.location.href = "limits.php";
 	}

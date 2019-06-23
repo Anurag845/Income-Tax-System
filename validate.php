@@ -11,28 +11,27 @@
 			padding: 0;
 			font-size: 16;
 		}
-	
-		td, th {
-            text-align: left;
-            padding: 8px;
-        }
         
         .empdetails, table.empdetails td {
         	margin-top: 20px;
         	border: 1px solid black;
         }
         
-        .decdetails, table.decdetails td {
-        	margin-top: 60px;
-        	border: 1px solid black;
+        .decdetails {
+        	margin-top: 60px;        	
         }
-        
-        .selname {
-        	margin-top: 40px;
-        }
-        
+
         table {
+        	padding: 0;
         	border-collapse: collapse;
+        }
+        
+        td, th {
+            text-align: left;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            padding-left: 20px;
+            padding-right: 20px;
         }
         
         input, select {
@@ -83,7 +82,6 @@
   			text-decoration: none;
 		}
 
-
 		.topnav a:hover {
   			background-color: #ddd;
   			color: black;
@@ -124,10 +122,6 @@
   			<a onclick="gotoValidate();">Declaration Validation</a>
   			<a onclick="gotoTaxable();">Taxable Amount</a>
   			<a onclick="gotoTax();">Income Tax</a>
-  			<a onclick="gotoLimit();">Exemption Limits</a>
-  			<a onclick="gotoSlabs();">Tax Slabs</a>
-  			<a onclick="gotoSalary();">Gross Salary</a>
-  			<a onclick="gotoReset();">Reset</a>
 		</div>
 				
 	</div>
@@ -243,21 +237,59 @@
 							echo "<tr>";
 							echo "</tr>";
 							
+							$decs = array();
+							$c = 0;
 							while($row = mysqli_fetch_array($details))
 							{
 								$input_name = $row['dec_id'];
+								$decs[$c] = $input_name;
+								$c++;
 								echo "<tr>";
 								echo "<td>" . $cnt . "</td>";
 								echo "<td>" . $row['dec_type'] . "</td>";
 								echo "<td>" . $row['amount_declared'] . "</td>";
 								if($row['status'] == 'Pending') {
-									echo "<td> <input type='number' name='" . $input_name . "'> </td>";									
+									echo "<td> <input type='number' name='$input_name'> </td>";									
 								}
 								else {
 									echo "<td>" . $row['amount_proved'] . "</td>";
 								}
 								echo "</tr>";
 								$cnt++;
+							}
+							
+							$sql = "select dec_id from Limits where sub_field = 'yes'";
+							$get_sub = mysqli_query($conn,$sql);
+							if(!$get_sub) {
+								echo mysqli_error($conn);
+							}
+							else {
+								$dec_id = array();
+								$c = 0;
+								while($row = mysqli_fetch_array($get_sub)) {
+									$dec_id[$c] = $row['dec_id'];								
+									$c++;
+								}
+							}
+							
+							$count = 0;
+							while($count < $c) {
+								$sql = "select sub_id from Dec_sub_fields where field_id = '$dec_id[$count]'";
+								$res = mysqli_query($conn,$sql);
+								$flag = false;
+								while($row = mysqli_fetch_array($res)) {
+									foreach($decs as $dec) {
+										if($dec == $row['sub_id']) {
+											echo "<input type='hidden' name='$dec_id[$count]' value=1>";
+											$flag = true;
+											break;
+										}
+									}
+									if($flag == true) {
+										break;
+									}
+								}
+								$count++;
 							}
 																					
 							echo "<td colspan='4' style='text-align:center;padding: 30px;border-left-style:hidden;border-right-style:hidden;border-bottom-style:hidden;'> <input type='submit' value='Submit'> </td>";
@@ -282,15 +314,11 @@
 	<script>
 	
         function gotoHome() {
-			window.location.href = "menu.html";
+			window.location.href = "user_menu.html";
 		}
         
         function gotoForm() {
 			window.location.href = "form.php";
-		}
-	
-		function gotoLimit() {
-			window.location.href = "limits.php";
 		}
 	
 		function gotoValidate() {
@@ -301,22 +329,10 @@
 			window.location.href = "taxable.php";
 		}
 		
-		function gotoSlabs() {
-			window.location.href = "tax_slabs.php";
-		}
-
 		function gotoTax() {
 			window.location.href = "tax.php";
 		}
 		
-		function gotoSalary() {
-			window.location.href = "salary.php";
-		}
-		
-		function gotoReset() {
-			window.location.href = "reset.php";
-		}
-	
 	</script>
 
 </body>

@@ -64,6 +64,10 @@
 		background: white;
 		border: 1px solid grey;
 	}
+	
+	.back_btn {
+		margin-bottom: 50px;
+	}
 
 </style>
 
@@ -82,8 +86,8 @@
   			<a onclick="gotoSlabs();">Tax Slabs</a>
   			<a onclick="gotoSalary();">Gross Salary</a>
   			<a onclick="gotoReset();">Reset</a>
-			<a onclick="gotoAddField();">Add Field</a>
-			<a onclick="gotoRemoveField();">Remove Field</a>
+  			<a onclick="gotoAddField();">Add Field</a>
+  			<a onclick="gotoRemoveField();">Remove Field</a>
 		</div>
 				
 	</div>
@@ -91,12 +95,82 @@
 	<div class="contents">
 
 		<?php
-
 			include 'db_connect.php';
-
+			
 			$conn = OpenCon();
 			
-			$dec_sql = "select dec_id,sub_field from Limits";
+			$dec = "select dec_id,sub_field from Limits";
+			$ids = mysqli_query($conn,$dec);
+			if(!$ids) {
+				echo mysqli_error($conn);	
+			}
+			else {
+				$del_id = array();
+				$sub_info = array();
+				$del_cnt = 0;
+				while($row = mysqli_fetch_array($ids)) {
+					$id = $row["dec_id"];
+					if(isset($_POST[$id])) {
+						$del_id[$del_cnt] = $id;
+						$sub_info[$del_cnt] = $row["sub_field"];
+						$del_cnt++;
+					}
+				}
+			}
+			
+			for($c = 0; $c < $del_cnt; $c++) {
+				$id = $del_id[$c];
+				$del_field = "delete from Limits where dec_id = '$id'";
+				mysqli_query($conn,$del_field);
+				if($sub_info[$c] == "no") {
+					$del_dec = "delete from Declarations where dec_id = '$id'";
+					mysqli_query($conn,$del_dec);
+				}
+				else {
+					$get_sub = "select sub_id from Dec_sub_fields where dec_id = '$id'";
+					$sub_ids = mysqli_query($conn,$get_sub);
+					if(!$sub_ids) {
+						mysqli_error($conn);
+					}
+					else {
+						$sub_id = array();
+						$sub_cnt = 0;
+						while($res = mysqli_fetch_array($sub_ids)) {
+							$sub_id[$sub_cnt] = $res["sub_id"];
+							$del_sub_dec = "delete from Declarations where dec_id='$sub_id[$sub_cnt]'";
+							mysqli_query($conn,$del_sub_dec);
+							$sub_cnt++;
+						}
+						$del_sub = "delete from Dec_sub_fields where dec_id = '$id'";
+						mysqli_query($conn,$del_sub);
+					}
+				}
+			}
+			
+			$deduc = "select ded_id from Standard_Deduc";
+			$deducs = mysqli_query($conn,$deduc);
+			if(!$deducs) {
+				echo mysqli_error($conn);	
+			}
+			else {
+				$deduc_id = array();
+				$deduc_cnt = 0;
+				while($row = mysqli_fetch_array($deducs)) {
+					$std_id = $row["ded_id"];
+					if(isset($_POST[$std_id])) {
+						$deduc_id[$deduc_cnt] = $std_id;
+						$deduc_cnt++;
+					}
+				}
+			}
+			
+			for($c = 0; $c < $deduc_cnt; $c++) {
+				$std_id = $deduc_id[$c];
+				$del_ded = "delete from Standard_Deduc where ded_id = '$std_id'";
+				mysqli_query($conn,$del_ded);
+			}
+			
+			$dec_sql = "select dec_id,sub_field,tax_limit from Limits";
 			$decs = mysqli_query($conn,$dec_sql);
 			
 			if(!$decs) {
@@ -105,60 +179,13 @@
 			else {
 				$dec_ids = array();
 				$sub_present = array();
+				$limits = array();
 				$cnt = 0;
 				while($row = mysqli_fetch_array($decs)) {
 					$dec_ids[$cnt] = $row['dec_id'];
 					$sub_present[$cnt] = $row['sub_field'];
+					$limits[$cnt] = $row['tax_limit'];
 					$cnt++;
-				}
-			}
-			
-			$limits = array();
-			$cnt = 0;
-			$flag = false;
-			foreach($dec_ids as $dec_id) {
-				$limits[$cnt] = $_POST[$dec_id];
-				$sql = "update Limits set tax_limit = $limits[$cnt] where dec_id = '$dec_id'";
-				if(mysqli_query($conn,$sql)) {
-					$flag = true;
-				}
-				else {
-					$flag = false;
-				}
-				$cnt++;
-			}
-	
-			if($flag == true) {
-    			echo "Limits updated successfully. ";
-			} 
-			else {
-    			echo mysqli_error($conn);
-			}
-			
-			$deduc = array();
-			$sql = "select field from Standard_Deduc";
-			$res = mysqli_query($conn,$sql);
-			if(!$res) {
-				echo mysqli_error($conn);
-			}
-			else {
-				$d_c = 0;
-				$flag = false;
-				while($row = mysqli_fetch_array($res)) {
-					$deduc[$d_c] = $row["field"];
-					$name = str_replace(' ', '', $deduc[$d_c]);
-					$val = $_POST[$name];
-					$sql = "update Standard_Deduc set value=$val where field = '$deduc[$d_c]'";
-					if(mysqli_query($conn,$sql)) {
-						$flag = true;
-					}
-					else {
-						$flag = false;
-					}
-					$d_c++;
-				}
-				if($flag == false) {
-					echo mysqli_error($conn);
 				}
 			}
 			
@@ -423,21 +450,14 @@
 				}
 			}
 			
-			CloseCon($conn);
-
 		?>
-
-		<br>
-		<br>
-	
-		<button onclick="goBack();">Back</button>
 	
 	</div>
 
 </body>
 
-<script>
-
+<script>	
+	
 	function goBack() {
 		window.location.href = "limits.php";
 	}

@@ -75,14 +75,12 @@
 		
 		<div class="topnav">
 			<a onclick="gotoHome();">Home</a>
-  			<a onclick="gotoForm();">Declaration Form</a>
-  			<a onclick="gotoValidate();">Declaration Validation</a>
-  			<a onclick="gotoTaxable();">Taxable Amount</a>
-  			<a onclick="gotoTax();">Income Tax</a>
   			<a onclick="gotoLimit();">Exemption Limits</a>
   			<a onclick="gotoSlabs();">Tax Slabs</a>
   			<a onclick="gotoSalary();">Gross Salary</a>
   			<a onclick="gotoReset();">Reset</a>
+  			<a onclick="gotoAddField();">Add Field</a>
+  			<a onclick="gotoRemoveField();">Remove Field</a>
 		</div>
 				
 	</div>
@@ -135,39 +133,31 @@
     <script>
 		
         function gotoHome() {
-			window.location.href = "menu.html";
-		}
-        
-        function gotoForm() {
-			window.location.href = "form.php";
+			window.location.href = "admin_menu.html";
 		}
 	
 		function gotoLimit() {
 			window.location.href = "limits.php";
 		}
 	
-		function gotoValidate() {
-			window.location.href = "validate.php";
-		}
-
-		function gotoTaxable() {
-			window.location.href = "taxable.php";
-		}
-		
 		function gotoSlabs() {
 			window.location.href = "tax_slabs.php";
 		}
 
-		function gotoTax() {
-			window.location.href = "tax.php";
-		}
-		
 		function gotoSalary() {
 			window.location.href = "salary.php";
 		}
 		
 		function gotoReset() {
 			window.location.href = "reset.php";
+		}
+		
+		function gotoAddField() {
+			window.location.href = "new_fields.php";
+		}
+		
+		function gotoRemoveField() {
+			window.location.href = "remove_fields.php";
 		}
         
     </script>

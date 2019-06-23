@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<style>
+
+	html {
+    	overflow-y: scroll;
+    }
+	
+	* {
+  		box-sizing: border-box;
+	}
+	
+	.left_top {
+		float: left;
+		width: 50%;
+	  	padding: 10px;
+	  	background: #aaa;
+	}
+	
+	.left_bottom {
+		float: left;
+		width: 50%;
+	  	padding: 10px;
+	  	background: #ccc;
+	}
+
+	.left_top:hover {
+		background: gray;
+	}
+	
+	.left_bottom:hover {
+		background: gray;
+	}
+	
+	.right_top:hover {
+		background: gray;
+	}
+	
+	.right_bottom:hover {
+		background: gray;
+	}
+	
+	.right_top {
+		float: right;
+		width: 50%;
+	  	padding: 10px;
+	  	background: #bbb;
+	}
+	
+	.right_bottom {
+		float: right;
+		width: 50%;
+	  	padding: 10px;
+	  	background: #ddd;
+	}
+
+	.row:after {
+	  content: "";
+	  display: table;
+	  clear: both;
+	}
+
+	.menu {
+		position: relative;
+    	top: 40%;
+    	transform: translateY(40%);
+		width: 50%;
+		margin: 0 auto;
+	}
+	
+	.heading {
+		top: 0;
+        left: 0;
+        right: 0;
+        height: 70px;
+        width: 100%;
+		padding: 0;
+		position: fixed; 
+	}
+	
+	body {
+		margin: 0;
+		padding: 0;
+		font-size: 16;
+	}
+	
+	h1 {
+		margin: 0;
+		text-align: center;
+		line-height: 70px;
+	}
+	
+</style>
+</head>
+<body>
+
+	<div class='heading'>
+		
+		<h1>Income Tax System</h1>
+				
+	</div>
+
+	<div class="menu">
+		<div class="row">
+  			<div class="left_top" onclick="gotoLimits();">
+    			<h2>Exemption Limits</h2>
+    			<p>Update the exemption limits</p>
+  			</div>
+  			<div class="right_top" onclick="gotoSlabs();">
+    			<h2>Tax Slabs</h2>
+    			<p>Define tax slabs</p>
+  			</div>
+		</div>
+		
+		<div class="row">
+  			<div class="left_bottom" onclick="gotoSalary();">
+    			<h2>Gross Salary</h2>
+    			<p>Update Employee's Salary</p>
+  			</div>
+  			<div class="right_bottom" onclick="gotoReset();">
+    			<h2>Reset</h2>
+    			<p>Remove all records</p>
+  			</div>
+		</div>
+		
+		<div class="row">
+  			<div class="left_top" onclick="gotoAddField();">
+    			<h2>Add Field</h2>
+    			<p>Add a new Field</p>
+  			</div>
+  			<div class="right_top" onclick="gotoDeleteField();">
+    			<h2>Remove Field</h2>
+    			<p>Remove a field</p>
+  			</div>
+		</div>
+		
+	</div>
+
+<script>
+
+	function gotoLimits() {
+		window.location.href = "limits.php";
+	}
+
+	function gotoSlabs() {
+		window.location.href = "tax_slabs.php";
+	}
+	
+	function gotoSalary() {
+		window.location.href = "salary.php";
+	}
+	
+	function gotoAddField() {
+		window.location.href = "new_fields.php";
+	}
+	
+	function gotoDeleteField() {
+		window.location.href = "remove_fields.php";
+	}
+	
+	function gotoReset() {
+		window.location.href = "reset.php";
+	}
+
+</script>
+
+</body>
+</html>
+

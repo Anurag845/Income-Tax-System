@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<style>
+
+	html {
+    	overflow-y: scroll;
+    }
+	
+	* {
+  		box-sizing: border-box;
+	}
+	
+	.left_top {
+		float: left;
+		width: 50%;
+	  	padding: 10px;
+	  	background: #aaa;
+	}
+	
+	.left_bottom {
+		float: left;
+		width: 50%;
+	  	padding: 10px;
+	  	background: #ccc;
+	}
+
+	.left_top:hover {
+		background: gray;
+	}
+	
+	.left_bottom:hover {
+		background: gray;
+	}
+	
+	.right_top:hover {
+		background: gray;
+	}
+	
+	.right_bottom:hover {
+		background: gray;
+	}
+	
+	.right_top {
+		float: right;
+		width: 50%;
+	  	padding: 10px;
+	  	background: #bbb;
+	}
+	
+	.right_bottom {
+		float: right;
+		width: 50%;
+	  	padding: 10px;
+	  	background: #ddd;
+	}
+
+	.row:after {
+	  content: "";
+	  display: table;
+	  clear: both;
+	}
+
+	.menu {
+		position: relative;
+    	top: 50%;
+    	transform: translateY(50%);
+		width: 50%;
+		margin: 0 auto;
+	}
+	
+	.heading {
+		top: 0;
+        left: 0;
+        right: 0;
+        height: 70px;
+        width: 100%;
+		padding: 0;
+		position: fixed; 
+	}
+	
+	body {
+		margin: 0;
+		padding: 0;
+		font-size: 16;
+	}
+	
+	h1 {
+		margin: 0;
+		text-align: center;
+		line-height: 70px;
+	}
+	
+</style>
+</head>
+<body>
+
+	<div class='heading'>
+		
+		<h1>Income Tax System</h1>
+				
+	</div>
+
+	<div class="menu">
+		<div class="row">
+  			<div class="left_top" onclick="gotoForm();">
+    			<h2>Declaration Form</h2>
+    			<p>Fill declaration entries</p>
+  			</div>
+  			<div class="right_top" onclick="gotoValidate();">
+    			<h2>Declaration Validation</h2>
+    			<p>Validate declaration evidence</p>
+  			</div>
+		</div>
+		
+		<div class="row">
+  			<div class="left_bottom" onclick="gotoTaxable();">
+    			<h2>Taxable Amount</h2>
+    			<p>Monthly taxable amount</p>
+  			</div>
+  			<div class="right_bottom" onclick="gotoTax();">
+    			<h2>Income Tax</h2>
+    			<p>Monthly income tax</p>
+  			</div>
+		</div>
+		
+	</div>
+
+<script>
+
+	function gotoForm() {
+		window.location.href = "form.php";
+	}
+	
+	function gotoLimits() {
+		window.location.href = "limits.php";
+	}
+	
+	function gotoValidate() {
+		window.location.href = "validate.php";
+	}
+
+	function gotoTaxable() {
+		window.location.href = "taxable.php";
+	}
+	
+	function gotoSlabs() {
+		window.location.href = "tax_slabs.php";
+	}
+	
+	function gotoTax() {
+		window.location.href = "tax.php";
+	}
+	
+	function gotoSalary() {
+		window.location.href = "salary.php";
+	}
+	
+	function gotoAddEmployee() {
+		window.location.href = "reset.php";
+	}
+
+</script>
+
+</body>
+</html>
+
